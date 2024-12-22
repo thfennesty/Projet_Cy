@@ -1,3 +1,0 @@
-Using file: tmp/filtered_data.csv
-Output file opened successfully.
-Results collected and written to the output file successfully.
