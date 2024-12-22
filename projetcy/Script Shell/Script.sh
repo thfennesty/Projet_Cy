@@ -1,32 +1,30 @@
 #!/bin/bash
 
-#Option d’aide (-h), si présente, toutes les autres options sont ignorées
-function afficher_aide {
+
+function display_help {
     for i in $@
     do
-        if [$i = "-h"]
+        if [ $i = "-h" ]
         then
-            echo "================== Bienvenue sur la page d'aide ===================="
+            echo "================== Welcome to the help page ===================="
             echo
-            echo "Nous sommes ici pour vous accompagner dans l'analyser de différentes stations (stationsHV-A, HV-B, postes LV), 
-                afin de déterminer si elles sont en situation de surproduction ou de sous-production d’énergie, ainsi que 
-                d’évaluer quelle proportion de leur énergie est consommée par les entreprises et les particuliers."
+            echo "We are here to assist you in analyzing various stations (HV-A stations, HV-B stations, LV posts), to determine whether they are in a state of overproduction or underproduction of energy, as well as to evaluate what proportion of their energy is consumed by companies and individuals."
             echo 
-            echo "Pour ce faire vous devez entrer simplement 3 choses, avec une ou plusieurs options à chaque étape:
+            echo "To achieve this, you simply need to enter three things, with one or more options at each step:
             
-                1. Le chemin du fichier 
-                        option : Entrez le chemin d'entrée du fichier.
+                1. The file path 
+                        option: Enter the input file path.
                         
-                Définissez vos paramètres d’observation :
+                Define your observation parameters:
                 
-                2. Le type de station à analyser ''
-                        options : 'hvb','hva' ou les 'lv'.
-                3. La catégorie du client à examiner la consommation ''
-                        options : celles des entreprises 'comp', de particuliers 'indiv', ou de tous 'all'."
+                2. The type of station to analyze ''
+                        options: 'hvb','hva' or 'lv'.
+                3. The client category to examine consumption ''
+                        options: companies 'comp', individuals 'indiv', or all 'all'."
             echo
-            echo"Attention, les HVB et HVA ne peuvent être assimilées aux options indiv ni all !
+            echo"Note: HVB and HVA cannot be associated with the 'indiv' or 'all' options!
             
-                Notez que vous pouvez revenir sur cette page d'aide si vous entrez -h en argument."
+                You can return to this help page by entering -h as an argument."
             echo 
             echo "===================================================================="
             exit 0
@@ -34,141 +32,57 @@ function afficher_aide {
     done
 }
 
-
-#1)LES DIFFERENTS PARAMETRES DU SCRIPT 
-
-
-#chemin du fichier de données
-if [ -f "$1" ]; then
-    echo "Le fichier d'entré existe et se trouve à : $1"
+#Checking the various script parameters
+if [ -f "$1" ] ; then
+    while [ ! -d input ] ; do
+        mkdir input
+    done
+    cp "$1" input/input_file_copy.csv
+    echo "The input file has been copied to this location: input/input_file_copy.csv"
 else
-    echo "Erreur : Le fichier $1 n'existe pas."
-    affiche_aide
-    echo "Durée du traitement : 0.0sec."
+    echo "Error: The file $1 does not exist."
+    display_help
+    echo "Length of treatment: 0.0sec."
     exit 1
 fi
 
-#type de station à traiter   
-if [ $2="hvb" ]
-then
-    colonne=1
-elif [ $2="hva" ]
-    colonne=2
-elif [ $2="lv" ]
-    colonne=3
+if [ "$2" == 'hvb' ] ;then
+    column=1
+elif [ "$2" == 'hva' ]
+    column=2
+elif [ "$2" == 'lv' ]
+    column=3
 else
-    echo "Erreur : Option '$2' non reconnue. Les options valides sont 'hvb', 'hva' ou 'lv'."
-    affiche_aide
-    echo "Durée du traitement : 0.0sec."
-    exit 1
-fi
-#type de consommateur à traiter
-if [ $3="comp" ]
-then
-    consom=1
-elif [ $3="indiv" ]
-    consom=2
-elif [ $3="all" ]
-    consom=3
-else
-    echo "Erreur : Option '$3' non reconnue. Les options valides sont 'comp', 'indiv' ou 'all'."
-    affiche_aide
-    echo "Durée du traitement : 0.0sec."
+    echo "Error : Option '$2' not recognized. Valid options are 'hvb', 'hva' or 'lv'."
+    display_help
+    echo "Length of treatment: 0.0sec."
     exit 1
 fi
 
-if [ $colonne = 1 ] || [ $colonne = 2 ] && [ $consom != "comp" ]
+if [ "$3" == "comp" ];then
+    consumption=1
+elif [ "$3" == "indiv" ]
+    consumption=2
+elif [ "$3" == "all" ]
+    consumption=3
+else
+    echo "Error : Option '$3' not recognized. Valid options are 'comp', 'indiv' or 'all'."
+    display_help
+    echo "Length of treatment 0.0sec."
+    exit 1
+fi
+
+if [ $column = 1 ] || [ $column = 2 ] && [ $consumption != 1 ]
 then
-    echo "Erreur : Les options 'all' et 'indiv' ne sont pas autorisées pour les stations HVA et HVB."
-    afiche_aide
-    echo "Durée du traitement : 0.0sec."
+    echo "Error : options 'all' and 'indiv' cannot be combined with HVB or HVA stations."
+    display_help
+    echo "Length of treatment: 0.0sec."
     exit 2
 fi
 
-#script SHELL doit s’assurer que toutes les options obligatoires sont présentes
-echo "Le fichier d'entrée est : $1"
-echo "Choix de la station: $2"
-echo "Choix de consommation : $3"
+echo "Final parameters: Input file is $1, Station choice: $2, Consumption choice: $3"
 
-
-
-#FILTRAGE du fichier DATA_CWIRE.csv
-
-if [ "$colonne" = 1 ]; then # Filtrer les lignes où la colonne 'HV-B Station' est remplie
-    grep -E "^[^;]*;[^;]*;[^;]*;[^;]*;[^;]*;[^;]*;[^;]*;[^;]*" "$1" > tmp_filtrer.csv
-elif [ "$colonne" = 2 ]; then 
-    grep -E "^[^;]*;[^;]*;[^;]*;[^;]*;[^;]*;[^;]*;[^;]*;[^;]*" "$1" > tmp_filtrer.csv
-elif [ "$colonne" = 3 ]; then 
-    grep -E "^[^;]*;[^;]*;[^;]*;[^;]*;[^;]*;[^;]*;[^;]*;[^;]*" "$1" > tmp_filtrer.csv
-fi
-
-if [ "$consom" =1 ]; then # Filtrer les lignes où 'Company' est renseigné
-    grep -E "^[^;]*;[^;]*;[^;]*;[^;]*;[^;]*;[^;]*;[^;]*;[^;]*" tmp_filtrer.csv > tmp_filtrer_comp.csv
-elif [ "$consom" = 2 ]; then # Filtrer les lignes où 'Individual' est renseigné
-    grep -E "^[^;]*;[^;]*;[^;]*;[^;]*;[^;]*;[^;]*;[^;]*;[^;]*" tmp_filtrer.csv > tmp_filtrer_indiv.csv
-elif [ "$consom" = 3 ]; then # Conserver toutes les lignes (avec ou sans consommateur)  n'appliques aucun filtrage 
-    cp tmp_filtrer.csv tmp_filtrer_all.csv
-fi
-
-rm tmp_filtrer.csv
-
-
-ProgrammeC="./codeC/mon_programme"   #Variable contenant le nom de l'exécutable à vérifier.
-FichierSource="./codeC/mon_programme.c"  #Variable contenant le chemin vers le fichier source C à compiler.
-Makefile="./codeC/Makefile"  # Makefile pour la compilation
-
-# Vérifier si l'exécutable existe
-if [ ! -f "$ProgrammeC" ]; then
-    echo "L'exécutable \"$ProgrammeC\" n'existe pas encore, on peut donc lancer la compilation..."
-    
-    if [ ! -d codeC ]; then
-        echo "Erreur : dossier codeC introuvable. Compilation impossible"
-        exit 1
-    fi
-    # Vérification de l'existence du fichier source avant la compilation
-    if [ ! -f "$FichierSource" ]; then
-        echo "Erreur : Le fichier source \"$FichierSource\" est introuvable. Compilation impossible"
-        exit 1
-    fi
-    # Vérification de l'existence du Makefile avant la compilation
-    if [ ! -f "$Makefile" ]; then
-        echo "Erreur : Le make \"$Makefile\" est introuvable. Compilation impossible"
-        exit 1
-    fi
-    
-    # Lancer la compilation avec 'make' 
-    cd ./codeC  # Aller dans le dossier contenant le Makefile
-    make       # Lancer make pour compiler
-    cd ..      # Revenir au dossier initial
-    
-    # Vérifier si la compilation a réussi
-    if [ $? -ne 0 ]; then
-        echo "Erreur : La compilation a échoué."
-        exit 2
-    fi
-else
-    echo "L'exécutable \"$ProgrammeC\" existe déjà, pas besoin de compliler."
-fi
-
-
-
-#Une fois la compilation effectuée le scrit pourra effectuer le traitement demandé en argument
-
-# VERIFIER LA DUREE DU TRAITEMENT ne contient pas la phase de compilation
-
-temps_depart=$(date +%s.%N)
-
-# Traitement demandé en argument
-echo "Calcul de la somme des consommateurs..."
-./calcul_consommation "tmp_filtrer_comp.csv" "$consom" > tmp/somme_consommateurs.txt
-
-
-temps_fin=$(date +%s.%N)
-duree=`echo "$temps_fin - $temps_depart" | bc`
-echo "Durée du traitement : ${duree}sec."
-
-
-#Gestion du dosier tmp
+#Files management
 if [ ! -d tmp ]; then
     mkdir tmp
 else 
@@ -177,15 +91,81 @@ else
     cd ..
 fi
 
-if [ ! -d tests ]; then
-    mkdir tests
+
+#Filtering the DATA_CWIRE.csv file
+if [ "$column" = 1 ]; then #Filter rows where column 1 is filled in
+    grep -E "^[^;]*;[^;]*;[^;]*;[^;]*;[^;]*;[^;]*;[^;]*;[^;]*" "$1" > tmp_filter.csv
+elif [ "$column" = 2 ]; then 
+    grep -E "^[^;]*;[^;]*;[^;]*;[^;]*;[^;]*;[^;]*;[^;]*;[^;]*" "$1" > tmp_filter.csv
+elif [ "$column" = 3 ]; then 
+    grep -E "^[^;]*;[^;]*;[^;]*;[^;]*;[^;]*;[^;]*;[^;]*;[^;]*" "$1" > tmp_filter.csv
 fi
 
+if [ "$consumption" = 1 ]; then
+    grep -E "^[^;]*;[^;]*;[^;]*;[^;]*;[^;]*;[^;]*;[^;]*;[^;]*" tmp_filter.csv > tmp_filter_comp.csv
+    file_to_use="tmp_filter_comp.csv"
+elif [ "$consumption" = 2 ]; then 
+    grep -E "^[^;]*;[^;]*;[^;]*;[^;]*;[^;]*;[^;]*;[^;]*;[^;]*" tmp_filter.csv > tmp_filter_indiv.csv
+    file_to_use="tmp_filter_indiv.csv"
+elif [ "$consumption" = 3 ]; then #Apply no other filtering to tmp_filter.csv
+    cp tmp_filter.csv tmp_filter_all.csv
+    file_to_use="tmp_filter_all.csv"
+fi
+
+#Add the number of lines in the first line
+line_count=$(wc -l < "$file_to_use")
+sed -i "1i$line_count" "$file_to_use"
 
 
-#Après avoir calculé les sommes des consommateurs, nous pouvons ajouter les résultats au fichier CSV de sortie et trier par capacité croissante.
 
-nom_fichier="tmp/${2}_${3}.csv" #nom du fichier csv de sortie
+#Switching to C program compilation management
+
+ProgramC="./codeC/main"  
+FileSource="./codeC/main.c"  
+Makefile="./codeC/Makefile"
+
+if [ ! -f "$ProgramC" ]; then
+    echo "The executable “$ProgramC\” does not yet exist, so we can start compiling..."
+
+    if [ ! -d codeC ]; then
+        echo "Error: codeC folder not found. Compilation impossible"
+        exit 1
+    fi
+    if [ ! -f "$FileSource" ]; then
+        echo "Error: The source file “$FileSource\” cannot be found. Compilation impossible"
+        exit 1
+    fi
+    if [ ! -f "$Makefile" ]; then
+        echo "Error: The make “$Makefile\” cannot be found. Compilation impossible"
+        exit 1
+    fi
+
+    #Start compilation with 'make'
+    cd ./codeC  
+    make
+    cd ..      
+
+    if [ $? -ne 0 ]; then
+        echo "Error: Compilation failed."
+        exit 2
+    fi
+else
+    echo "The “$ProgramC\” executable already exists, no need to compile it."
+fi
+
+start_time=$(date +%s.%N)
+
+echo "Calculating the sum of consumers..."
+./codeC/main "$file_to_use" > tmp/sum_consumers.txt 
+
+end_time=$(date +%s.%N)
+duration=`echo "$end_time - $start_time" | bc`
+echo "Length of treatment: ${duration}sec."
+
+
+#After calculating the consumer sums, we can add the results to the output CSV file and sort by increasing capacity.
+
+output_name="tmp/${2}_${3}.csv"
 
 case $2 in
     "hvb") opt_station="Station HVB" ;;
@@ -194,36 +174,33 @@ case $2 in
 esac
 
 case $3 in
-    "comp") opt_consom="Consommation (entreprises)" ;;
-    "indiv") opt_consom="Consommation (particuliers)" ;;
-    "all") opt_consom="Consommation (tous)" ;;
+    "comp") opt_consump="Consommation (entreprises)" ;;
+    "indiv") opt_consump="Consommation (particuliers)" ;;
+    "all") opt_consump="Consommation (tous)" ;;
 esac
 
-echo "$opt_station:Capacité:$opt_consom" > "$nom_fichier"
+echo "$opt_station:Capacité:$opt_consump" > "$output_name"
 
-
-#Ajouter la a valeur de capacité et la somme des consommateurs branchés directement au fichier final
+#Add capacity value and sum of connected consumers directly to final file
 while read ligne; do
     station=$(echo $ligne | cut -d' ' -f1)
-    capacite=$(echo $ligne | cut -d' ' -f2)
-    consommation=$(echo $ligne | cut -d' ' -f3)
-    echo "$station:$capacite:$consommation" >> "$nom_fichier"
-done < tmp/somme_consommateurs.txt
+    capacity=$(echo $ligne | cut -d' ' -f2)
+    consump=$(echo $ligne | cut -d' ' -f3)
+    echo "$station:$capacity:$consump" >> "$output_name"
+done < tmp/sum_consumers.txt
 
-#Traitement spécial pour l'option lv_all
-if [ "$opt_station" = "Station LV" ] && [ "$opt_consom" = "Consommation (tous)" ]; then
-    # Calculer la différence entre capacité et consommation et trier par cette différence
-    awk -F: '{ diff = $2 - $3; print $0 ":" diff }' "$nom_fichier" | sort -t':' -k4 -n > tmp/lv_trie.txt
+sort -t':' -k2 -n "$output_name" -o "$output_name" #sort by increasing capacity
 
-    # Extraire les 10 postes avec la plus grande consommation et les 10 postes avec la moins grande consommation
+if [ ! -d tests ]; then
+    mkdir tests
+fi 
+cat $output_name >> tests/final_output_file.csv
+
+#Special treatment for the lv_all options
+if [ "$output_name" = "tmp/lv_all.csv" ] ; then
+    awk -F: '{ diff = $2 - $3; print $0 ":" diff }' "$output_name" | sort -t':' -k4 -n > tmp/lv_trie.txt
     head -n 10 tmp/lv_trie.txt > tmp/10_plus.txt
     tail -n 10 tmp/lv_trie.txt > tmp/10_moins.txt
-
-    # Combiner les résultats et les mettre dans un fichier final
     cat tmp/10_plus.txt tmp/10_moins.txt > tmp/lv_all_minmax.csv
+    cat tmp/lv_all_minmax.csv >> tests/final_output_file.csv
 fi
-
-sort -t':' -k2 -n "$nom_fichier" -o "$nom_fichier" #trier par ordre capacité croissant
-
-
-rm -f tmp_filtrer_comp.csv tmp_filtrer_indiv.csv tmp_filtrer_all.csv tmp/somme_consommateurs.txt
