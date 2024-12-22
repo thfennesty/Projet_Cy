@@ -7,7 +7,8 @@ function display_help {
         then
             echo "================== Welcome to the help page ===================="
             echo
-            echo "We are here to assist you in analyzing various stations (HV-A stations, HV-B stations, LV posts), to determine whether they are in a state of overproduction or underproduction of energy, as well as to evaluate what proportion of their energy is consumed by companies and individuals."
+            echo "We are here to assist you in analyzing various stations (HV-A stations, HV-B stations, LV posts), to determine whether they are 
+            in a state of overproduction or underproduction of energy, as well as to evaluate what proportion of their energy is consumed by companies and individuals."
             echo 
             echo "To achieve this, you simply need to enter three things, with one or more options at each step:
             
