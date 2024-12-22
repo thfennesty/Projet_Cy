@@ -23,7 +23,7 @@ The C-Wire project aims to provide a synthesis of energy data from a complex net
 	•	Option Validation: Verification of passed arguments (stations, consumers, etc.).
 	•	Output File Creation: Generation of CSV files containing the results of the analysis.
 
--C Program Mode
+- C Program Mode
 	•	Data Processing: Calculation of energy consumption using an AVL to optimize performance.
 	•	Generality: Management of HV-B, HV-A, and LV stations with a single program.
 	•	Memory Management: Dynamic allocation and deallocation to minimize memory footprint.
