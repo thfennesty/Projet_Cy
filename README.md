@@ -3,7 +3,7 @@
 The C-Wire project aims to provide a comprehensive analysis of energy data within a complex network structured around a hierarchy of power plants, substations, and distribution posts. The goal is to identify instances of overproduction and underproduction while calculating the distribution of energy consumption between businesses and individual consumers.
 
 ## Table of content 
-[Project Description](#project-descrption)
+-[Project Description](#project-descrption)
 -[Features](#features)
 - [Shell mode](#shell-mode)
 - [C mode](#c-mode)
@@ -16,7 +16,8 @@ The C-Wire project aims to provide a comprehensive analysis of energy data withi
 
 ## Project Description
 The C-Wire project aims to provide a synthesis of energy data from a complex network based on a hierarchical system of power plants, substations, and distribution stations. The goal is to identify situations of overproduction, underproduction, and to calculate the distribution of energy consumed by businesses and individuals.
-Features
+
+## Features
 Script Shell Mode
 	•	Data Filtering: Selection of relevant information from the input CSV file.
 	•	Option Validation: Verification of passed arguments (stations, consumers, etc.).
