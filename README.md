@@ -18,12 +18,12 @@ The C-Wire project aims to provide a comprehensive analysis of energy data withi
 The C-Wire project aims to provide a synthesis of energy data from a complex network based on a hierarchical system of power plants, substations, and distribution stations. The goal is to identify situations of overproduction, underproduction, and to calculate the distribution of energy consumed by businesses and individuals.
 
 ## Features
-Script Shell Mode
+- Script Shell Mode
 	•	Data Filtering: Selection of relevant information from the input CSV file.
 	•	Option Validation: Verification of passed arguments (stations, consumers, etc.).
 	•	Output File Creation: Generation of CSV files containing the results of the analysis.
 
-C Program Mode
+-C Program Mode
 	•	Data Processing: Calculation of energy consumption using an AVL to optimize performance.
 	•	Generality: Management of HV-B, HV-A, and LV stations with a single program.
 	•	Memory Management: Dynamic allocation and deallocation to minimize memory footprint.
@@ -73,7 +73,7 @@ Program C Usage
 	•	Provides structured results, including total capacity and consumption for analyzed stations.
 
 ## File structure
--Projet_C-Wire/
+- Projet_C-Wire/
 - ├── c-wire.sh          # Main Shell script to run the project
 - ├── Makefile           # Makefile to compile the C program
 - ├── codeC/             # Directory containing source files and the executable for the C program
