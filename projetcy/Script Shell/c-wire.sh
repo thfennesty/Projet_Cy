@@ -142,9 +142,7 @@ if [ ! -f "$ProgramC" ]; then
     fi
 
     # Start compilation with 'make'
-    cd   
-    make
-    cd ..      
+     make -f "$Makefile"  
 
     if [ $? -ne 0 ]; then
         echo "Error: Compilation failed."
