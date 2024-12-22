@@ -38,13 +38,13 @@ if [ -z "$1" ]; then
     exit 1
 fi
 
-# Check if the file exists and copy it to the input directory
+#Checking the various script parameters  
+
 if [ ! -f "$1" ]; then
     echo "Error: The file '$1' does not exist."
     display_help
     exit 1
 fi
-
 echo "Input file path: $1"
 
 while [ ! -d input ] ; do
@@ -53,7 +53,6 @@ done
 cp "$1" input/input_file_copy.csv
 echo "The input file has been copied to this location: input/input_file_copy.csv"
 
-# Set the column number based on station type
 if [ "$2" = "hvb" ]; then
     column=1
 elif [ "$2" = "hva" ]; then
@@ -66,7 +65,6 @@ else
     exit 1
 fi
 
-# Set the consumption type
 if [ "$3" = "comp" ]; then
     consumption=1
 elif [ "$3" = "indiv" ]; then
@@ -79,7 +77,6 @@ else
     exit 1
 fi
 
-# Error check for invalid combinations
 if [ $column -eq 1 ] || [ $column -eq 2 ] && [ $consumption -ne 1 ]; then
     echo "Error : options 'all' and 'indiv' cannot be combined with HVB or HVA stations."
     display_help
@@ -95,7 +92,7 @@ else
     rm -f tmp/*
 fi
 
-# Filter of the csv file
+# Filtering of the .csv file  
 
 FILTERED_FILE="tmp/filtered_data.csv"
 
@@ -121,7 +118,7 @@ if [[ ! -s "$FILTERED_FILE" ]]; then
     exit 1
 fi
 
-# Add the number of lines in the first line
+# Add the total number of lines in the first line
 line_count=$(wc -l < "$FILTERED_FILE")
 sed -i "1i$line_count" "$FILTERED_FILE"
 
