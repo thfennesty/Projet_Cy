@@ -1,10 +1,9 @@
 #!/bin/bash
 
-
 function display_help {
     for i in $@
     do
-        if [ $i = "-h" ]
+        if [ "$i" = "-h" ]
         then
             echo "================== Welcome to the help page ===================="
             echo
@@ -22,7 +21,7 @@ function display_help {
                 3. The client category to examine consumption ''
                         options: companies 'comp', individuals 'indiv', or all 'all'."
             echo
-            echo"Note: HVB and HVA cannot be associated with the 'indiv' or 'all' options!
+            echo "Note: HVB and HVA cannot be associated with the 'indiv' or 'all' options!
             
                 You can return to this help page by entering -h as an argument."
             echo 
@@ -32,115 +31,122 @@ function display_help {
     done
 }
 
-#Checking the various script parameters
-if [ -f "$1" ] ; then
-    while [ ! -d input ] ; do
-        mkdir input
-    done
-    cp "$1" input/input_file_copy.csv
-    echo "The input file has been copied to this location: input/input_file_copy.csv"
-else
-    echo "Error: The file $1 does not exist."
+# Check if the input file path is provided
+if [ -z "$1" ]; then
+    echo "Error: No input file path provided."
     display_help
-    echo "Length of treatment: 0.0sec."
     exit 1
 fi
 
-if [ "$2" == 'hvb' ] ;then
+# Check if the file exists and copy it to the input directory
+if [ ! -f "$1" ]; then
+    echo "Error: The file '$1' does not exist."
+    display_help
+    exit 1
+fi
+
+echo "Input file path: $1"
+
+while [ ! -d input ] ; do
+    mkdir input
+done
+cp "$1" input/input_file_copy.csv
+echo "The input file has been copied to this location: input/input_file_copy.csv"
+
+# Set the column number based on station type
+if [ "$2" = "hvb" ]; then
     column=1
-elif [ "$2" == 'hva' ]
+elif [ "$2" = "hva" ]; then
     column=2
-elif [ "$2" == 'lv' ]
+elif [ "$2" = "lv" ]; then
     column=3
 else
     echo "Error : Option '$2' not recognized. Valid options are 'hvb', 'hva' or 'lv'."
     display_help
-    echo "Length of treatment: 0.0sec."
     exit 1
 fi
 
-if [ "$3" == "comp" ];then
+# Set the consumption type
+if [ "$3" = "comp" ]; then
     consumption=1
-elif [ "$3" == "indiv" ]
+elif [ "$3" = "indiv" ]; then
     consumption=2
-elif [ "$3" == "all" ]
+elif [ "$3" = "all" ]; then
     consumption=3
 else
     echo "Error : Option '$3' not recognized. Valid options are 'comp', 'indiv' or 'all'."
     display_help
-    echo "Length of treatment 0.0sec."
     exit 1
 fi
 
-if [ $column = 1 ] || [ $column = 2 ] && [ $consumption != 1 ]
-then
+# Error check for invalid combinations
+if [ $column -eq 1 ] || [ $column -eq 2 ] && [ $consumption -ne 1 ]; then
     echo "Error : options 'all' and 'indiv' cannot be combined with HVB or HVA stations."
     display_help
-    echo "Length of treatment: 0.0sec."
     exit 2
 fi
 
 echo "Final parameters: Input file is $1, Station choice: $2, Consumption choice: $3"
 
-#Files management
+# Files management
 if [ ! -d tmp ]; then
     mkdir tmp
 else 
-    cd tmp
     rm -f tmp/*
-    cd ..
 fi
 
+# Filter of the csv file
 
-#Filtering the DATA_CWIRE.csv file
-if [ "$column" = 1 ]; then #Filter rows where column 1 is filled in
-    grep -E "^[^;]*;[^;]*;[^;]*;[^;]*;[^;]*;[^;]*;[^;]*;[^;]*" "$1" > tmp_filter.csv
-elif [ "$column" = 2 ]; then 
-    grep -E "^[^;]*;[^;]*;[^;]*;[^;]*;[^;]*;[^;]*;[^;]*;[^;]*" "$1" > tmp_filter.csv
-elif [ "$column" = 3 ]; then 
-    grep -E "^[^;]*;[^;]*;[^;]*;[^;]*;[^;]*;[^;]*;[^;]*;[^;]*" "$1" > tmp_filter.csv
+FILTERED_FILE="tmp/filtered_data.csv"
+
+awk -F ";" -v station="$2" -v consumer="$3" '
+BEGIN { OFS = ":" }
+{
+    # Filter data based on station and consumer type
+    if (station == "hvb" && consumer == "comp" && $2 != "-") {
+        print $2, $7, $8
+    } else if (station == "hva" && consumer == "comp" && $3 != "-") {
+        print $3, $7, $8
+    } else if (station == "lv" && consumer == "comp" && $4 != "-" && ($5 != "-" || $7 != "-")) {
+        print $4, $7, $8
+    } else if (station == "lv" && consumer == "indiv" && $4 != "-" && ($6 != "-" || $7 != "-")) {
+        print $4, $7, $8
+    } else if (station == "lv" && consumer == "all" && $4 != "-") {
+        print $4, $7, $8
+    }
+}' "$1" > "$FILTERED_FILE"
+
+if [[ ! -s "$FILTERED_FILE" ]]; then
+    echo "Erreur : No data found matching filters."
+    exit 1
 fi
 
-if [ "$consumption" = 1 ]; then
-    grep -E "^[^;]*;[^;]*;[^;]*;[^;]*;[^;]*;[^;]*;[^;]*;[^;]*" tmp_filter.csv > tmp_filter_comp.csv
-    file_to_use="tmp_filter_comp.csv"
-elif [ "$consumption" = 2 ]; then 
-    grep -E "^[^;]*;[^;]*;[^;]*;[^;]*;[^;]*;[^;]*;[^;]*;[^;]*" tmp_filter.csv > tmp_filter_indiv.csv
-    file_to_use="tmp_filter_indiv.csv"
-elif [ "$consumption" = 3 ]; then #Apply no other filtering to tmp_filter.csv
-    cp tmp_filter.csv tmp_filter_all.csv
-    file_to_use="tmp_filter_all.csv"
-fi
+# Add the number of lines in the first line
+line_count=$(wc -l < "$FILTERED_FILE")
+sed -i "1i$line_count" "$FILTERED_FILE"
 
-#Add the number of lines in the first line
-line_count=$(wc -l < "$file_to_use")
-sed -i "1i$line_count" "$file_to_use"
-
-
-
-#Switching to C program compilation management
-
-ProgramC="./codeC/main"  
-FileSource="./codeC/main.c"  
-Makefile="./codeC/Makefile"
+# Switch to C program compilation management
+ProgramC="./main"  
+FileSource="./main.c"  
+Makefile="./Makefile"
 
 if [ ! -f "$ProgramC" ]; then
-    echo "The executable “$ProgramC\” does not yet exist, so we can start compiling..."
+    echo "The executable '$ProgramC' does not yet exist, so we can start compiling..."
 
     if [ ! -d codeC ]; then
         echo "Error: codeC folder not found. Compilation impossible"
         exit 1
     fi
     if [ ! -f "$FileSource" ]; then
-        echo "Error: The source file “$FileSource\” cannot be found. Compilation impossible"
+        echo "Error: The source file '$FileSource' cannot be found. Compilation impossible"
         exit 1
     fi
     if [ ! -f "$Makefile" ]; then
-        echo "Error: The make “$Makefile\” cannot be found. Compilation impossible"
+        echo "Error: The makefile '$Makefile' cannot be found. Compilation impossible"
         exit 1
     fi
 
-    #Start compilation with 'make'
+    # Start compilation with 'make'
     cd ./codeC  
     make
     cd ..      
@@ -150,21 +156,20 @@ if [ ! -f "$ProgramC" ]; then
         exit 2
     fi
 else
-    echo "The “$ProgramC\” executable already exists, no need to compile it."
+    echo "The '$ProgramC' executable already exists, no need to compile it."
 fi
 
 start_time=$(date +%s.%N)
 
+
 echo "Calculating the sum of consumers..."
-./codeC/main "$file_to_use" > tmp/sum_consumers.txt 
+./main "$FILTERED_FILE" > tmp/sum_consumers.txt 
 
 end_time=$(date +%s.%N)
-duration=`echo "$end_time - $start_time" | bc`
+duration=$(echo "$end_time - $start_time" | bc)
 echo "Length of treatment: ${duration}sec."
 
-
-#After calculating the consumer sums, we can add the results to the output CSV file and sort by increasing capacity.
-
+# After calculating the consumer sums, we can add the results to the output CSV file and sort by increasing capacity.
 output_name="tmp/${2}_${3}.csv"
 
 case $2 in
@@ -181,7 +186,7 @@ esac
 
 echo "$opt_station:Capacité:$opt_consump" > "$output_name"
 
-#Add capacity value and sum of connected consumers directly to final file
+# Add capacity value and sum of connected consumers directly to final file
 while read ligne; do
     station=$(echo $ligne | cut -d' ' -f1)
     capacity=$(echo $ligne | cut -d' ' -f2)
@@ -189,14 +194,14 @@ while read ligne; do
     echo "$station:$capacity:$consump" >> "$output_name"
 done < tmp/sum_consumers.txt
 
-sort -t':' -k2 -n "$output_name" -o "$output_name" #sort by increasing capacity
+sort -t':' -k2 -n "$output_name" -o "$output_name" # sort by increasing capacity
 
 if [ ! -d tests ]; then
     mkdir tests
 fi 
 cat $output_name >> tests/final_output_file.csv
 
-#Special treatment for the lv_all options
+# Special treatment for the lv_all options
 if [ "$output_name" = "tmp/lv_all.csv" ] ; then
     awk -F: '{ diff = $2 - $3; print $0 ":" diff }' "$output_name" | sort -t':' -k4 -n > tmp/lv_trie.txt
     head -n 10 tmp/lv_trie.txt > tmp/10_plus.txt
