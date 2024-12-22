@@ -77,11 +77,9 @@ Program C Usage
 - ├── c-wire.sh          # Main Shell script to run the project
 - ├── Makefile           # Makefile to compile the C program
 - ├── codeC/             # Directory containing source files and the executable for the C program
-- │   ├── fonction.c     # Source file with function implementations
 - │   ├── headers.h      # Header file with function and structure declarations
 - │   ├── main.c         # Main source file of the program
 - │   ├── read.c         # Source file for input data handling
-- │   └── main           # Compiled executable for normal use
 - └── README.md          # Documentation explaining installation and usage
 
 
