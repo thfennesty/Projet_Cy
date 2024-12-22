@@ -29,7 +29,15 @@ C Program Mode
 	•	Memory Management: Dynamic allocation and deallocation to minimize memory footprint.
 	•	Data Validation: Checking input consistency and returning explicit errors in case of issues.
 
-## Usage 
+## Installation 
+	Clone the repository from GitHub:
+git clone lien
+	Navigate to the project directory:
+cd C-Wire
+	Compile the project using the provided Makefile:
+make -C codeC
+## Usage
+
 
 ## File structure
 Project_C-Wire/
