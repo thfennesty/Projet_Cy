@@ -1,16 +1,33 @@
+# Compiler and flags
+CC = gcc
+CFLAGS = -IHeaders  # Include the Headers directory
+
+# Object files
+OBJ = main.o \
+			codeC/functions_AVL.o \
+			codeC/read.o
+
+# Target
 all: main
 
-CC = clang
-override CFLAGS += -g -Wno-everything -pthread -lm
+# Rule to compile the object files
+main.o: main.c
+	$(CC) $(CFLAGS) -c main.c -o main.o
 
-SRCS = $(shell find . -name '.ccls-cache' -type d -prune -o -type f -name '*.c' -print)
-HEADERS = $(shell find . -name '.ccls-cache' -type d -prune -o -type f -name '*.h' -print)
+codeC/functions_AVL.o: codeC/functions_AVL.c
+	$(CC) $(CFLAGS) -c codeC/functions_AVL.c -o codeC/functions_AVL.o
 
-main: $(SRCS) $(HEADERS)
-	$(CC) $(CFLAGS) $(SRCS) -o "$@"
+codeC/read.o: codeC/read.c
+	$(CC) $(CFLAGS) -c codeC/read.c -o codeC/read.o
 
-main-debug: $(SRCS) $(HEADERS)
-	$(CC) $(CFLAGS) -O0 $(SRCS) -o "$@"
+# Rule to link object files into an executable
+main: $(OBJ)
+	$(CC) -o main $(OBJ) -lm
 
+# Clean up object files and the executable
 clean:
-	rm -f main main-debug
+	rm -f $(OBJ) main
+
+# Run the shell script (if applicable)
+run-shell:
+	./c-wire.sh
