@@ -7,7 +7,8 @@ function display_help {
         then
             echo "================== Welcome to the help page ===================="
             echo
-            echo "We are here to assist you in analyzing various stations (HV-A stations, HV-B stations, LV posts), to determine whether they are in a state of overproduction or underproduction of energy, as well as to evaluate what proportion of their energy is consumed by companies and individuals."
+            echo "We are here to assist you in analyzing various stations (HV-A stations, HV-B stations, LV posts), to determine whether they are 
+            in a state of overproduction or underproduction of energy, as well as to evaluate what proportion of their energy is consumed by companies and individuals."
             echo 
             echo "To achieve this, you simply need to enter three things, with one or more options at each step:
             
@@ -38,13 +39,13 @@ if [ -z "$1" ]; then
     exit 1
 fi
 
-# Check if the file exists and copy it to the input directory
+#Checking the various script parameters  
+
 if [ ! -f "$1" ]; then
     echo "Error: The file '$1' does not exist."
     display_help
     exit 1
 fi
-
 echo "Input file path: $1"
 
 while [ ! -d input ] ; do
@@ -53,7 +54,6 @@ done
 cp "$1" input/input_file_copy.csv
 echo "The input file has been copied to this location: input/input_file_copy.csv"
 
-# Set the column number based on station type
 if [ "$2" = "hvb" ]; then
     column=1
 elif [ "$2" = "hva" ]; then
@@ -66,7 +66,6 @@ else
     exit 1
 fi
 
-# Set the consumption type
 if [ "$3" = "comp" ]; then
     consumption=1
 elif [ "$3" = "indiv" ]; then
@@ -79,7 +78,6 @@ else
     exit 1
 fi
 
-# Error check for invalid combinations
 if [ $column -eq 1 ] || [ $column -eq 2 ] && [ $consumption -ne 1 ]; then
     echo "Error : options 'all' and 'indiv' cannot be combined with HVB or HVA stations."
     display_help
@@ -89,18 +87,20 @@ fi
 echo "Final parameters: Input file is $1, Station choice: $2, Consumption choice: $3"
 
 # Files management
+
 if [ ! -d tmp ]; then
     mkdir tmp
 else 
     rm -f tmp/*
 fi
 
-# Filter data using AWK
+# Filtering of the .csv file  
+
 FILTERED_FILE="tmp/filtered_data.csv"
 
 awk -F ";" -v station="$2" -v consumer="$3" '
-BEGIN { OFS = ":" }  # This should be outside NR > 2
-NR > 2 {  # Process only from the third line onward
+BEGIN { OFS = ";" }
+{
     # Filter data based on station and consumer type
     if (station == "hvb" && consumer == "comp" && $2 != "-") {
         print $2, $7, $8
@@ -115,9 +115,6 @@ NR > 2 {  # Process only from the third line onward
     }
 }' "$1" > "$FILTERED_FILE"
 
-
-
-# Check if filtered file is empty
 if [[ ! -s "$FILTERED_FILE" ]]; then
     echo "Error : No Data founded."
     exit 1
@@ -125,16 +122,9 @@ else
     echo "Filtered data saved to $FILTERED_FILE"
 fi
 
-# Add the number of lines in the first line
+# Add the total number of lines in the first line
 line_count=$(wc -l < "$FILTERED_FILE")
 sed -i "1i$line_count" "$FILTERED_FILE"
-
-if [ -f "$FILTERED_FILE" ]; then
-    chmod 644 tmp/filtered_data.csv 
-    echo "Permissions set for tmp/filterd_data.csv"
-else
-    echo "Error: tmp/filterd_data.csv was not created."
-fi
 
 # Switch to C program compilation management
 ProgramC="./main"  
@@ -143,11 +133,6 @@ Makefile="./Makefile"
 
 if [ ! -f "$ProgramC" ]; then
     echo "The executable '$ProgramC' does not yet exist, so we can start compiling..."
-
-    if [ ! -d codeC ]; then
-        echo "Error: codeC folder not found. Compilation impossible"
-        exit 1
-    fi
     if [ ! -f "$FileSource" ]; then
         echo "Error: The source file '$FileSource' cannot be found. Compilation impossible"
         exit 1
@@ -157,7 +142,8 @@ if [ ! -f "$ProgramC" ]; then
         exit 1
     fi
 
-    make -f "$Makefile"      
+    # Start compilation with 'make'
+     make -f "$Makefile"  
 
     if [ $? -ne 0 ]; then
         echo "Error: Compilation failed."
@@ -169,12 +155,12 @@ fi
 
 start_time=$(date +%s.%N)
 
-echo "Calculating the sum of consumers..."
-./main "$FILTERED_FILE"  > tmp/sum_consumers.txt
 
+echo "Calculating the sum of consumers..."
+"$ProgramC" "$FILTERED_FILE" > tmp/sum_consumers.txt 
 
 end_time=$(date +%s.%N)
-duration=`echo "$end_time - $start_time" | bc`
+duration=$(echo "$end_time - $start_time" | bc)
 echo "Length of treatment: ${duration}sec."
 
 # After calculating the consumer sums, we can add the results to the output CSV file and sort by increasing capacity.
