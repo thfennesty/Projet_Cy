@@ -86,9 +86,9 @@ Projet_C-Wire/
 
 
  ## Authors
- El dana Aida
-Nguyen Thuy Tran
-Sanchez Elsa
+- El dana Aida
+- Nguyen Thuy Tran
+- Sanchez Elsa
 
 
 
