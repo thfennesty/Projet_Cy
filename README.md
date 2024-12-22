@@ -31,7 +31,7 @@ The C-Wire project aims to provide a synthesis of energy data from a complex net
 
 ## Installation 
 	- Clone the repository from GitHub:
-- git clone lien
+- git clone https://github.com/thfennesty
 	- Navigate to the project directory:
 - cd C-Wire
 	- Compile the project using the provided Makefile:
