@@ -97,7 +97,7 @@ fi
 FILTERED_FILE="tmp/filtered_data.csv"
 
 awk -F ";" -v station="$2" -v consumer="$3" '
-BEGIN { OFS = ":" }
+BEGIN { OFS = ";" }
 {
     # Filter data based on station and consumer type
     if (station == "hvb" && consumer == "comp" && $2 != "-") {
