@@ -86,6 +86,7 @@ fi
 echo "Final parameters: Input file is $1, Station choice: $2, Consumption choice: $3"
 
 # Files management
+
 if [ ! -d tmp ]; then
     mkdir tmp
 else 
@@ -114,8 +115,10 @@ BEGIN { OFS = ";" }
 }' "$1" > "$FILTERED_FILE"
 
 if [[ ! -s "$FILTERED_FILE" ]]; then
-    echo "Erreur : No data found matching filters."
+    echo "Error : No Data founded."
     exit 1
+else
+    echo "Filtered data saved to $FILTERED_FILE"
 fi
 
 # Add the total number of lines in the first line
@@ -129,11 +132,6 @@ Makefile="./Makefile"
 
 if [ ! -f "$ProgramC" ]; then
     echo "The executable '$ProgramC' does not yet exist, so we can start compiling..."
-
-    if [ ! -d codeC ]; then
-        echo "Error: codeC folder not found. Compilation impossible"
-        exit 1
-    fi
     if [ ! -f "$FileSource" ]; then
         echo "Error: The source file '$FileSource' cannot be found. Compilation impossible"
         exit 1
@@ -144,7 +142,7 @@ if [ ! -f "$ProgramC" ]; then
     fi
 
     # Start compilation with 'make'
-    cd ./codeC  
+    cd   
     make
     cd ..      
 
@@ -160,7 +158,7 @@ start_time=$(date +%s.%N)
 
 
 echo "Calculating the sum of consumers..."
-./main "$FILTERED_FILE" > tmp/sum_consumers.txt 
+"$ProgramC" "$FILTERED_FILE" > tmp/sum_consumers.txt 
 
 end_time=$(date +%s.%N)
 duration=$(echo "$end_time - $start_time" | bc)
