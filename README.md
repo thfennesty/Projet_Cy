@@ -30,22 +30,22 @@ C Program Mode
 	•	Data Validation: Checking input consistency and returning explicit errors in case of issues.
 
 ## Installation 
-	Clone the repository from GitHub:
-git clone lien
+	- Clone the repository from GitHub:
+- git clone lien
 	- Navigate to the project directory:
--cd C-Wire
-	-Compile the project using the provided Makefile:
--make -C codeC
+- cd C-Wire
+	- Compile the project using the provided Makefile:
+- make -C codeC
 
 
 ## Usage
--Running the Application
+- Running the Application
 
--To run the application, use the following command:
+- To run the application, use the following command:
 
--./c-wire.sh <input_file_path> <station_type> <consumer_type> [<plant_id>]
+- ./c-wire.sh <input_file_path> <station_type> <consumer_type> [<plant_id>]
 
--Shell Script Usage
+- Shell Script Usage
 
 1. Filter and Process Data
 	•	Specify the input CSV file path, station type, and consumer type as required arguments.
@@ -60,7 +60,7 @@ git clone lien
 4. Output Results
 	•	Generates CSV files summarizing station capacities and energy consumption based on the specified parameters.
 
--Program C Usage
+Program C Usage
 
 1. Data Processing
 	•	The program reads filtered data and calculates energy consumption using an AVL tree.
@@ -74,15 +74,15 @@ git clone lien
 
 ## File structure
 -Projet_C-Wire/
--├── c-wire.sh          # Main Shell script to run the project
--├── Makefile           # Makefile to compile the C program
--├── codeC/             # Directory containing source files and the executable for the C program
--│   ├── fonction.c     # Source file with function implementations
--│   ├── headers.h      # Header file with function and structure declarations
--│   ├── main.c         # Main source file of the program
--│   ├── read.c         # Source file for input data handling
--│   └── main           # Compiled executable for normal use
--└── README.md          # Documentation explaining installation and usage
+- ├── c-wire.sh          # Main Shell script to run the project
+- ├── Makefile           # Makefile to compile the C program
+- ├── codeC/             # Directory containing source files and the executable for the C program
+- │   ├── fonction.c     # Source file with function implementations
+- │   ├── headers.h      # Header file with function and structure declarations
+- │   ├── main.c         # Main source file of the program
+- │   ├── read.c         # Source file for input data handling
+- │   └── main           # Compiled executable for normal use
+- └── README.md          # Documentation explaining installation and usage
 
 
  ## Authors
